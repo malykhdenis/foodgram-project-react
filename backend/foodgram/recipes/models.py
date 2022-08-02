@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import User
+
 
 class Tags(models.Model):
     """Модель тегов"""
@@ -54,28 +56,58 @@ class Ingredients(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return self.name
+        return f'{self.name}, измеряется в {self.measurement_unit}'
 
 
 class Recipes(models.Model):
     """Модель рецептов."""
-    ingredients = models.ManyToManyField(
-        Ingredients,
-        related_name='ingredients',
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='author',
+        verbose_name='Автор',
+        help_text='Выберите автора',
+        blank=False,
+        null=True,
     )
-    tags = models.ManyToManyField(
-        Tags,
-        related_name='tags',
+    name = models.CharField(
+        verbose_name='Название',
+        help_text='Введите название блюда',
+        max_length=200,
+        blank=False,
+        null=False,
     )
     image = models.ImageField(
         verbose_name='Изображение',
     )
-    name = models.CharField(
-        verbose_name='Название',
-        help_text='Введите название рецепта',
-        max_length=200)
     text = models.TextField(
         verbose_name='Описание',
-        
+        help_text='Введите описание рецепта',
+        blank=False,
+        null=True,
     )
-    cooking_time = models.IntegerField
+    ingredients = models.ManyToManyField(
+        Ingredients,
+        related_name='ingredients',
+        help_text='Выберите ингридиенты',
+        blank=False,
+    )
+    tags = models.ManyToManyField(
+        Tags,
+        related_name='tags',
+        help_text='Введите тег',
+        blank=False,
+    )
+    cooking_time = models.IntegerField(
+        verbose_name='Время приготовления',
+        help_text='Введите время приготовления в минутах',
+        blank=False,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name

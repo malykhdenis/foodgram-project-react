@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class RecipesConfig(AppConfig):
-    name: str = 'recipes'
-    verbose_name: str = 'Управление рецептами'
+    name = 'recipes'
+    verbose_name = 'Управление рецептами'
