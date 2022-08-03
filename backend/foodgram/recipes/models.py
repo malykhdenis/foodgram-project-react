@@ -94,6 +94,7 @@ class Recipes(models.Model):
         related_name='tags',
         help_text='Введите тег',
         blank=False,
+        through='Ingredients_in_recipe',
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
@@ -108,3 +109,25 @@ class Recipes(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Ingredients_in_recipe(models.Model):
+    """Модель ингредиентов в рецепте."""
+    ingredients = models.ForeignKey(
+        Ingredients,
+        on_delete=models.SET_NULL,
+        related_name='ingredients',
+        verbose_name='Ингредиенты',
+    )
+    recipes = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Рецепты',
+    )
+    amount = models.IntegerField(
+        verbose_name='Количество',
+        blank=False,
+        null=True,
+        help_text='Введите количество ингридиента'
+    )
