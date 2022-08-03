@@ -18,7 +18,6 @@ class Tags(models.Model):
         help_text='Введите цветовой HEX-код(например, #49B64E)',
         max_length=16,
         blank=False,
-        unique=True,
     )
     slug = models.SlugField(
         verbose_name='Слаг',
@@ -75,7 +74,6 @@ class Recipes(models.Model):
         help_text='Введите название блюда',
         max_length=200,
         blank=False,
-        null=False,
     )
     image = models.ImageField(
         verbose_name='Изображение',
@@ -84,7 +82,6 @@ class Recipes(models.Model):
         verbose_name='Описание',
         help_text='Введите описание рецепта',
         blank=False,
-        null=True,
     )
     ingredients = models.ManyToManyField(
         Ingredients,
