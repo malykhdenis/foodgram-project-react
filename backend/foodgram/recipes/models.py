@@ -63,7 +63,7 @@ class Recipes(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        related_name='author',
+        related_name='recipes',
         verbose_name='Автор',
         help_text='Выберите автора',
         blank=False,
@@ -85,16 +85,16 @@ class Recipes(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredients,
-        related_name='ingredients',
+        related_name='recipes',
         help_text='Выберите ингридиенты',
         blank=False,
     )
     tags = models.ManyToManyField(
         Tags,
-        related_name='tags',
+        related_name='recipes',
         help_text='Введите тег',
         blank=False,
-        through='Ingredients_in_recipe',
+        through='IngredientsInRecipe',
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
@@ -111,19 +111,15 @@ class Recipes(models.Model):
         return self.name
 
 
-class Ingredients_in_recipe(models.Model):
+class IngredientsInRecipe(models.Model):
     """Модель ингредиентов в рецепте."""
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredients,
-        on_delete=models.SET_NULL,
-        related_name='ingredients',
-        verbose_name='Ингредиенты',
+        verbose_name='Ингредиент',
     )
-    recipes = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipes,
-        on_delete=models.CASCADE,
-        related_name='recipes',
-        verbose_name='Рецепты',
+        verbose_name='Рецепт',
     )
     amount = models.IntegerField(
         verbose_name='Количество',
@@ -131,3 +127,77 @@ class Ingredients_in_recipe(models.Model):
         null=True,
         help_text='Введите количество ингридиента'
     )
+
+
+class Follow(models.Model):
+    """Модель подписки"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Подписчик',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Автор',
+    )
+    following_date = models.DateTimeField(
+        'Дата подписки',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = ("Подписка")
+        verbose_name_plural = ("Подписки")
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
+
+
+class Favorite(models.Model):
+    """Модель избранного"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipes,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='favorites',
+    )
+
+    class Meta:
+        verbose_name = ("Избранное")
+
+    def __str__(self):
+        return f'Рецепт {self.recipe} в избранном у {self.user}'
+
+
+class Cart(models.Model):
+    """Модель списка покупок"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='carts',
+    )
+    recipes = models.ManyToManyField(
+        Recipes,
+        related_name='carts',
+        verbose_name='Рецепты',
+    )
+    date = models.DateTimeField(
+        'Дата создания списка',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = ("Список покупок")
+        verbose_name_plural = ("Списки покупок")
+
+    def __str__(self):
+        return f'Список покупок пользователя {self.user}'
