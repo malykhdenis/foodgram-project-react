@@ -4,7 +4,7 @@ from users.models import User
 
 
 class Tags(models.Model):
-    """Модель тегов"""
+    """Модель тегов."""
     name = models.CharField(
         verbose_name='Название',
         help_text='Введите название тега',
@@ -129,10 +129,15 @@ class IngredientsInRecipe(models.Model):
         null=True,
         help_text='Введите количество ингридиента'
     )
+    
+    class Meta:
+        verbose_name = ("Ингредиент в рецепте")
+        verbose_name_plural = ("Ингредиенты в рецепте")
 
 
-class Follow(models.Model):
-    """Модель подписки"""
+
+class Follows(models.Model):
+    """Модель подписок."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -158,8 +163,8 @@ class Follow(models.Model):
         return f'{self.user} подписан на {self.author}'
 
 
-class Favorite(models.Model):
-    """Модель избранного"""
+class Favorites(models.Model):
+    """Модель избранных."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -175,13 +180,14 @@ class Favorite(models.Model):
 
     class Meta:
         verbose_name = ("Избранное")
+        verbose_name_plural = ("Избранное")
 
     def __str__(self):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
 
 
-class Cart(models.Model):
-    """Модель списка покупок"""
+class Carts(models.Model):
+    """Модель списков покупок."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
