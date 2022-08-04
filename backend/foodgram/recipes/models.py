@@ -85,6 +85,7 @@ class Recipes(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredients,
+        through='IngredientsInRecipe',
         related_name='recipes',
         help_text='Выберите ингридиенты',
         blank=False,
@@ -94,7 +95,6 @@ class Recipes(models.Model):
         related_name='recipes',
         help_text='Введите тег',
         blank=False,
-        through='IngredientsInRecipe',
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
@@ -115,10 +115,12 @@ class IngredientsInRecipe(models.Model):
     """Модель ингредиентов в рецепте."""
     ingredient = models.ForeignKey(
         Ingredients,
+        on_delete=models.CASCADE,
         verbose_name='Ингредиент',
     )
     recipe = models.ForeignKey(
         Recipes,
+        on_delete=models.CASCADE,
         verbose_name='Рецепт',
     )
     amount = models.IntegerField(
