@@ -14,7 +14,7 @@ class User(AbstractUser):
         (ADMIN, 'admin'),
     )
 
-    login = models.CharField(
+    username = models.CharField(
         verbose_name='Логин',
         max_length=200,
         help_text='Введите логин',
@@ -54,7 +54,7 @@ class User(AbstractUser):
         help_text='Введите роль пользователя',
         max_length=16,
         choices=ROLES,
-        default='gues',
+        default='guest',
         blank=False,
         null=False,
     )
@@ -77,4 +77,4 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return self.name, self.login, self.surname
+        return f'{self.name} {self.username} {self.surname}'
