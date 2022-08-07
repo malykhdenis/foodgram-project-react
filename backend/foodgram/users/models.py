@@ -35,14 +35,14 @@ class User(AbstractUser):
         blank=False,
         unique=True,
     )
-    name = models.CharField(
+    first_name = models.CharField(
         verbose_name='Имя',
         max_length=50,
         help_text='Введите имя',
         blank=False,
         null=False,
     )
-    surname = models.CharField(
+    last_name = models.CharField(
         verbose_name='Фамилия',
         max_length=50,
         help_text='Введите фамилию',
@@ -77,4 +77,4 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return f'{self.name} {self.username} {self.surname}'
+        return f'{self.first_name} {self.username} {self.last_name}'
