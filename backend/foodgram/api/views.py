@@ -1,13 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
-# from rest_framework.decorators import action
-# from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-# from djoser.views import UserViewSet as Djoser
+from http import HTTPStatus
 
 from recipes.models import Ingredients, Recipes, Tags
 from users.models import User
-
 from .serializers import (IngredientsSerializer, TagsSerializer,
                           UserSerializer, UserCreateSerializer)
 
@@ -23,20 +22,22 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserCreateSerializer
         return UserSerializer
 
-    # @action(methods=['post'], detail=False)
-    # def set_password(self, request):
-    #     current_user_password = self.request.user.password
-    #     if request.data.get('current_password') == current_user_password:
-    #         self.request.user.password = request.data.get('new_password')
-    #         pass
-    # @action(methods=['post'], detail=False)
-    # def set_password(self, request, *args, **kwargs):
-    #     serializer = UserSerializer(data=request.data)
-    #     serializer.is_valid()
-    #     print(serializer.initial_data)
-    #     self.request.user.set_password(serializer.initial_data["new_password"])
-    #     self.request.user.save()
-    #     return Response({'message': 'password changed'})
+    @action(methods=['post'], detail=False)
+    def set_password(self, request):
+        current_user = self.request.user
+        if not current_user.check_password(
+            request.data.get('current_password')
+        ):
+            return Response(
+                {'message': 'Incorrect current password'},
+                status=HTTPStatus.BAD_REQUEST
+            )
+        current_user.set_password(request.data.get('new_password'))
+        current_user.save()
+        return Response(
+            {'message': 'Password changed'},
+            status=HTTPStatus.OK
+        )
 
 
 class UserMeViewSet(viewsets.ModelViewSet):
