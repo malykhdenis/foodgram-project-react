@@ -7,8 +7,9 @@ from http import HTTPStatus
 
 from recipes.models import Ingredients, Recipes, Tags
 from users.models import User
-from .serializers import (IngredientsSerializer, TagsSerializer,
-                          UserSerializer, UserCreateSerializer)
+from .serializers import (IngredientsSerializer, RecipesSerializer,
+                          TagsSerializer, UserSerializer, UserCreateSerializer)
+# from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -54,6 +55,7 @@ class TagsViewSet(viewsets.ModelViewSet):
     """Tags' viewset."""
     queryset = Tags.objects.all()
     serializer_class = TagsSerializer
+    pagination_class = None
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
@@ -65,5 +67,5 @@ class IngredientsViewSet(viewsets.ModelViewSet):
 class RecipesViewSet(viewsets.ModelViewSet):
     """Ingredients' viewset."""
     queryset = Recipes.objects.all()
-    serializer_class = IngredientsSerializer
+    serializer_class = RecipesSerializer
     paginator_class = LimitOffsetPagination

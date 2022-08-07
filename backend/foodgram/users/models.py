@@ -4,15 +4,6 @@ from django.db import models
 
 class User(AbstractUser):
     """Модель пользователя."""
-    GUEST = 'guest'
-    AUTH_USER = 'auth_user'
-    ADMIN = 'admin'
-
-    ROLES = (
-        (GUEST, 'guest'),
-        (AUTH_USER, 'auth_user'),
-        (ADMIN, 'admin'),
-    )
 
     username = models.CharField(
         verbose_name='Логин',
@@ -49,27 +40,6 @@ class User(AbstractUser):
         blank=True,
         null=False,
     )
-    role = models.CharField(
-        verbose_name='Роль пользователя',
-        help_text='Введите роль пользователя',
-        max_length=16,
-        choices=ROLES,
-        default='guest',
-        blank=False,
-        null=False,
-    )
-
-    @property
-    def is_guest(self):
-        return self.role == self.GUEST
-
-    @property
-    def is_auth_user(self):
-        return self.role == self.AUTH_USER
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN
 
     class Meta:
         ordering = ('id',)

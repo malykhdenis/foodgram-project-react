@@ -61,9 +61,26 @@ class RecipesSerializer(serializers.ModelSerializer):
     """Recipes' serializer."""
     tags = TagsSerializer()
     ingredients = IngredientsSerializer()
+    author = UserSerializer()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shoping_cart = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorite',
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shoping_cart', 'name', 'image', 'text',
                   'cooking_time')
         model = Recipes
+
+    def get_is_favorited(self, obj):
+        """Checking if recipe is favorited."""
+        user = self.context.get('request').user
+        if user.is_anonymous or user == obj.author:
+            return False
+        return user.favorites.filter(id=obj.id).exists()
+
+    def get_is_in_shoping_cart(self, obj):
+        """Checking if recipe is in shoping cart. """
+        user = self.context.get('request').user
+        if user.is_anonymous or not user.carts.exists():
+            return False
+        return user.carts.recipes.filter(id=obj.id).exists()
