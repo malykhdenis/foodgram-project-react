@@ -32,7 +32,7 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
         help_text='Введите адрес электронной почты',
-        blank=False,
+        blank=True,
         unique=True,
     )
     first_name = models.CharField(
@@ -46,7 +46,7 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         max_length=50,
         help_text='Введите фамилию',
-        blank=False,
+        blank=True,
         null=False,
     )
     role = models.CharField(
