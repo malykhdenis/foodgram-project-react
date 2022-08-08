@@ -2,8 +2,9 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from drf_extra_fields.fields import Base64ImageField
+from backend.foodgram.api.views import RecipesViewSet
 
-from recipes.models import Ingredients, IngredientsInRecipe, Recipes, Tags
+from recipes.models import Follows, Ingredients, IngredientsInRecipe, Recipes, Tags
 from users.models import User
 
 
@@ -146,3 +147,35 @@ class CartsSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'image', 'cooking_time',)
         model = Recipes
+
+
+class FollowsSerializer(serializers.ModelSerializer):
+    """Follows' serializer."""
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follows
+        fields = ('id', 'email', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        return Follows.objects.filter(user=obj.user,
+                                      author=obj.author).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        queryset = Recipes.objects.filter(author=obj.author)
+        if limit:
+            queryset = queryset[:int(limit)]
+        return CartsSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, obj):
+        return Recipes.objects.filter(author=obj.author).count()

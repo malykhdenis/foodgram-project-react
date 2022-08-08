@@ -7,9 +7,9 @@ from django.shortcuts import get_object_or_404
 
 from http import HTTPStatus
 
-from recipes.models import Carts, Favorites, Ingredients, Recipes, Tags
+from recipes.models import Carts, Favorites, Follows, Ingredients, Recipes, Tags
 from users.models import User
-from .serializers import (CartsSerializer, IngredientsSerializer,
+from .serializers import (CartsSerializer, FollowsSerializer, IngredientsSerializer,
                           RecipesSerializer, TagsSerializer, UserSerializer,
                           UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
@@ -43,6 +43,16 @@ class UserViewSet(viewsets.ModelViewSet):
             {'message': 'Password changed'},
             status=HTTPStatus.OK
         )
+
+    @action(detail=True, permission_classes=[IsAuthenticated],
+            serializer_class=FollowsSerializer)
+    def subscribe(self, request, id):
+        user = request.user
+        author = get_object_or_404(User, id=id)
+
+        follow = Follows.objects.create(user=user, author=author)
+        serializer = FollowsSerializer(follow)
+        return Response(serializer.data)
 
 
 class UserMeViewSet(viewsets.ModelViewSet):
