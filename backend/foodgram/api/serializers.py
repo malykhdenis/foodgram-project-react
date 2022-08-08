@@ -57,10 +57,15 @@ class IngredientsSerializer(serializers.ModelSerializer):
         model = Ingredients
 
 
+class IngredientsInRecipeSerializer(serializers.ModelSerializer):
+    """Ingredients in recipe serializer."""
+    pass
+
+
 class RecipesSerializer(serializers.ModelSerializer):
     """Recipes' serializer."""
-    tags = TagsSerializer()
-    ingredients = IngredientsSerializer()
+    tags = TagsSerializer(read_only=True, many=True)
+    ingredients = IngredientsSerializer(read_only=True, many=True)
     author = UserSerializer()
     is_favorited = serializers.SerializerMethodField()
     is_in_shoping_cart = serializers.SerializerMethodField()
@@ -74,13 +79,13 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Checking if recipe is favorited."""
         user = self.context.get('request').user
-        if user.is_anonymous or user == obj.author:
+        if user.is_anonymous:
             return False
-        return user.favorites.filter(id=obj.id).exists()
+        return Recipes.objects.filter(favorites__user=user, id=obj.id).exists()
 
     def get_is_in_shoping_cart(self, obj):
         """Checking if recipe is in shoping cart. """
         user = self.context.get('request').user
         if user.is_anonymous or not user.carts.exists():
             return False
-        return user.carts.recipes.filter(id=obj.id).exists()
+        return Recipes.objects.filter(carts__user=user, id=obj.id).exists()
