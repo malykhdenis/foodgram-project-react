@@ -2,15 +2,17 @@ from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 
 from http import HTTPStatus
 
-from recipes.models import Ingredients, Recipes, Tags
+from recipes.models import Carts, Ingredients, Recipes, Tags
 from users.models import User
-from .serializers import (IngredientsSerializer,
+from .serializers import (CartsSerializer, IngredientsSerializer,
                           RecipesSerializer, TagsSerializer, UserSerializer,
                           UserCreateSerializer)
-# from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -18,6 +20,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = IsAuthenticated
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -46,6 +49,7 @@ class UserMeViewSet(viewsets.ModelViewSet):
     """Users' viewset."""
     serializer_class = UserSerializer
     pagination_class = None
+    permission_classes = IsAuthenticated
 
     def get_queryset(self):
         current_user = self.request.user
@@ -57,12 +61,14 @@ class TagsViewSet(viewsets.ModelViewSet):
     queryset = Tags.objects.all()
     serializer_class = TagsSerializer
     pagination_class = None
+    permission_classes = IsAdminOrReadOnly
 
 
 class IngredientsViewSet(viewsets.ModelViewSet):
     """Ingredients' viewset."""
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
+    permission_classes = IsAdminOrReadOnly
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -70,6 +76,19 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     paginator_class = LimitOffsetPagination
+    permission_classes = IsAuthorOrReadOnly
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(methods=['post', 'delete'], detail=True,
+            permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        if request.method == 'POST':
+            Carts.objects.create(user=request.user, recipes=recipe)
+            serializer = CartsSerializer(recipe)
+            return Response(serializer.data)
+        cart = Carts.objects.filter(user=request.user, recipes=recipe)
+        cart.delete()
+        return Response(status=HTTPStatus.NO_CONTENT)

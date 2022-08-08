@@ -195,10 +195,11 @@ class Carts(models.Model):
         on_delete=models.CASCADE,
         related_name='carts',
     )
-    recipes = models.ManyToManyField(
+    recipes = models.ForeignKey(
         Recipes,
-        related_name='carts',
+        related_name='cart',
         verbose_name='Рецепты',
+        on_delete=models.CASCADE,
     )
     date = models.DateTimeField(
         'Дата создания списка',

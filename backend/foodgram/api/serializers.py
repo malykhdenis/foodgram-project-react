@@ -137,3 +137,12 @@ class RecipesSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time)
         instance.save()
         return instance
+
+
+class CartsSerializer(serializers.ModelSerializer):
+    """Carts' serializer."""
+    image = Base64ImageField()
+
+    class Meta:
+        fields = ('id', 'name', 'image', 'cooking_time',)
+        model = Recipes
