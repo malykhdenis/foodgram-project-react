@@ -1,6 +1,9 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Ingredients, Recipes, Tags
+from drf_extra_fields.fields import Base64ImageField
+
+from recipes.models import Ingredients, IngredientsInRecipe, Recipes, Tags
 from users.models import User
 
 
@@ -59,16 +62,30 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
 class IngredientsInRecipeSerializer(serializers.ModelSerializer):
     """Ingredients in recipe serializer."""
-    pass
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
+
+    class Meta:
+        model = IngredientsInRecipe
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+        validators = [UniqueTogetherValidator(
+            queryset=IngredientsInRecipe.objects.all(),
+            fields=['ingredient', 'recipe']
+            )
+                      ]
 
 
 class RecipesSerializer(serializers.ModelSerializer):
     """Recipes' serializer."""
     tags = TagsSerializer(read_only=True, many=True)
-    ingredients = IngredientsSerializer(read_only=True, many=True)
-    author = UserSerializer()
+    ingredients = IngredientsInRecipeSerializer(
+        source='ingredientsinrecipe_set', many=True, read_only=True)
+    author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shoping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
 
     class Meta:
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
@@ -89,3 +106,15 @@ class RecipesSerializer(serializers.ModelSerializer):
         if user.is_anonymous or not user.carts.exists():
             return False
         return Recipes.objects.filter(carts__user=user, id=obj.id).exists()
+
+    def create(self, validated_data):
+        """Creating new recipe and relations ingredients in recipe."""
+        recipe = Recipes.objects.create(**validated_data)
+        ingredients = self.initial_data.get('ingredients')
+        tags = self.initial_data.get('tags')
+        recipe.tags.set(tags)
+        for ingredient in ingredients:
+            IngredientsInRecipe.objects.create(
+                recipe=recipe, ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),)
+        return recipe
