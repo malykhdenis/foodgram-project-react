@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 
 from http import HTTPStatus
 
-from recipes.models import Carts, Ingredients, Recipes, Tags
+from recipes.models import Carts, Favorites, Ingredients, Recipes, Tags
 from users.models import User
 from .serializers import (CartsSerializer, IngredientsSerializer,
                           RecipesSerializer, TagsSerializer, UserSerializer,
@@ -91,4 +91,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         cart = Carts.objects.filter(user=request.user, recipes=recipe)
         cart.delete()
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+    @action(methods=['post', 'delete'], detail=True,
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk):
+        recipe = get_object_or_404(Recipes, pk=pk)
+        if request.method == 'POST':
+            Favorites.objects.create(user=request.user, recipe=recipe)
+            serializer = CartsSerializer(recipe)
+            return Response(serializer.data)
+        favorite = Favorites.objects.filter(user=request.user, recipe=recipe)
+        favorite.delete()
         return Response(status=HTTPStatus.NO_CONTENT)
