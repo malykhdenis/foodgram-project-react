@@ -4,11 +4,16 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 
 from http import HTTPStatus
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib import colors
+from reportlab.pdfgen import canvas
 
-from recipes.models import (Carts, Favorites, Follows, Ingredients, Recipes,
-                            Tags)
+from recipes.models import (Carts, Favorites, Follows, Ingredients,
+                            IngredientsInRecipe, Recipes, Tags)
 from users.models import User
 from .serializers import (CartsSerializer, FollowsSerializer,
                           IngredientsSerializer, RecipesSerializer,
@@ -21,7 +26,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = IsAuthenticated
+    permission_classes = IsAuthenticated
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -134,3 +139,51 @@ class RecipesViewSet(viewsets.ModelViewSet):
         favorite = Favorites.objects.filter(user=request.user, recipe=recipe)
         favorite.delete()
         return Response(status=HTTPStatus.NO_CONTENT)
+
+    @action(methods=['GET'], detail=False,
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request):
+        user = request.user
+        shopping_list = {}
+        ingredients = IngredientsInRecipe.objects.filter(
+            recipe__cart__user=user).values_list(
+                'ingredient__name',
+                'amount',
+                'ingredient__measurement_unit',
+                named=True)
+        for ingredient in ingredients:
+            name = ingredient.ingredient__name
+            measurement_unit = ingredient.ingredient__measurement_unit
+            amount = ingredient.amount
+            if name not in shopping_list:
+                shopping_list[name] = {
+                    'measurement_unit': measurement_unit,
+                    'amount': amount
+                }
+            else:
+                shopping_list[name]['amount'] += amount
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = (
+            'attachment; filename="shoping_list.pdf"')
+        pdfmetrics.registerFont(TTFont('GOST', 'GOST type A.ttf', 'UTF-8'))
+        pdf = canvas.Canvas(response)
+        pdf.setFont('GOST', 40)
+        pdf.setFillColor(colors.black)
+        pdf.drawCentredString(300, 770, 'Список покупок')
+        pdf.setFillColor(colors.black)
+        pdf.setFont('GOST', 24)
+        height = 700
+        for name, data in shopping_list.items():
+            pdf.drawString(
+                60,
+                height,
+                f"- {name} ({data['measurement_unit']}) - {data['amount']}"
+            )
+            height -= 25
+            if height == 50:
+                pdf.showPage()
+                pdf.setFont('Neocyr', 24)
+                height = 700
+        pdf.showPage()
+        pdf.save()
+        return response
