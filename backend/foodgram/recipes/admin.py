@@ -23,9 +23,13 @@ class IngredientsAdmin(admin.ModelAdmin):
 @admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
     """Admin interface for recipes."""
-    list_display = ('id', 'name', 'author',)
+    list_display = ('id', 'name', 'author', 'favorites')
     search_fields = ('name', 'author',)
     list_filter = ('author', 'name', 'tags',)
+
+    def favorites(self, obj):
+        """Counting recipe in favorites."""
+        return obj.favorites.count()
 
 
 @admin.register(IngredientsInRecipe)
