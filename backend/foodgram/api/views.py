@@ -45,14 +45,34 @@ class UserViewSet(viewsets.ModelViewSet):
             status=HTTPStatus.OK
         )
 
-    @action(detail=True,
-            serializer_class=FollowsSerializer)
-    def subscribe(self, request, id):
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
         user = request.user
-        author = get_object_or_404(User, id=id)
-        follow = Follows.objects.create(user=user, author=author)
-        serializer = FollowsSerializer(follow)
-        return Response(serializer.data)
+        follows = Follows.objects.filter(user=user)
+        pages = self.paginate_queryset(follows)
+        serializer = FollowsSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+    @action(methods=['POST', 'DELETE'], detail=True,
+            permission_classes=[IsAuthenticated])
+    def subscribe(self, request, pk):
+        user = request.user
+        author = get_object_or_404(User, id=pk)
+        if request.method == 'POST':
+            follow = Follows.objects.create(user=user, author=author)
+            serializer = FollowsSerializer(follow,
+                                           context={'request': request})
+            return Response(serializer.data)
+        follow = Follows.objects.filter(user=user, author=author)
+        if follow.exists():
+            follow.delete()
+            return Response(status=HTTPStatus.NO_CONTENT)
+        return Response({'errors': 'Вы не подписаны на данного автора'},
+                        status=HTTPStatus.BAD_REQUEST)
 
 
 class UserMeViewSet(viewsets.ModelViewSet):
