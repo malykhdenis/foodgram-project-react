@@ -7,11 +7,12 @@ from django.shortcuts import get_object_or_404
 
 from http import HTTPStatus
 
-from recipes.models import Carts, Favorites, Follows, Ingredients, Recipes, Tags
+from recipes.models import (Carts, Favorites, Follows, Ingredients, Recipes,
+                            Tags)
 from users.models import User
-from .serializers import (CartsSerializer, FollowsSerializer, IngredientsSerializer,
-                          RecipesSerializer, TagsSerializer, UserSerializer,
-                          UserCreateSerializer)
+from .serializers import (CartsSerializer, FollowsSerializer,
+                          IngredientsSerializer, RecipesSerializer,
+                          TagsSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 
 
@@ -20,7 +21,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = IsAuthenticated
+    # permission_classes = IsAuthenticated
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -44,12 +45,11 @@ class UserViewSet(viewsets.ModelViewSet):
             status=HTTPStatus.OK
         )
 
-    @action(detail=True, permission_classes=[IsAuthenticated],
+    @action(detail=True,
             serializer_class=FollowsSerializer)
     def subscribe(self, request, id):
         user = request.user
         author = get_object_or_404(User, id=id)
-
         follow = Follows.objects.create(user=user, author=author)
         serializer = FollowsSerializer(follow)
         return Response(serializer.data)

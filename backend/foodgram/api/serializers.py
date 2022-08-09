@@ -2,9 +2,9 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from drf_extra_fields.fields import Base64ImageField
-from backend.foodgram.api.views import RecipesViewSet
 
-from recipes.models import Follows, Ingredients, IngredientsInRecipe, Recipes, Tags
+from recipes.models import (Follows, Ingredients, IngredientsInRecipe, Recipes,
+                            Tags)
 from users.models import User
 
 
@@ -166,16 +166,20 @@ class FollowsSerializer(serializers.ModelSerializer):
                   'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
+        """"Checking if user is subscribed."""
         return Follows.objects.filter(user=obj.user,
                                       author=obj.author).exists()
 
     def get_recipes(self, obj):
+        """All users' recipes with limit."""
         request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        queryset = Recipes.objects.filter(author=obj.author)
-        if limit:
-            queryset = queryset[:int(limit)]
-        return CartsSerializer(queryset, many=True).data
+        recipes_limit = request.GET.get('recipes_limit')
+        recipes = Recipes.objects.filter(author=obj.author)
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        serializer = CartsSerializer(recipes, many=True)
+        return serializer.data
 
     def get_recipes_count(self, obj):
+        """Recipes' count."""
         return Recipes.objects.filter(author=obj.author).count()
