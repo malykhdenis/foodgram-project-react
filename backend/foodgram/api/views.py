@@ -1,3 +1,4 @@
+from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
@@ -5,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 
 from http import HTTPStatus
 from reportlab.pdfbase import pdfmetrics
@@ -19,7 +21,7 @@ from .serializers import (CartsSerializer, FollowsSerializer,
                           IngredientsSerializer, RecipesSerializer,
                           TagsSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import IngredientsFilter, RecipesFilter
+from .filters import RecipesFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -140,10 +142,11 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     """Ingredients' viewset."""
     queryset = Ingredients.objects.all()
     serializer_class = IngredientsSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     search_fields = ('^name',)
     pagination_class = None
-    filter_backends = IngredientsFilter
+    filter_backends = [filters.SearchFilter, ]
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -152,7 +155,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     serializer_class = RecipesSerializer
     paginator_class = LimitOffsetPagination
     permission_classes = [IsAuthorOrReadOnly]
-    filter_backends = RecipesFilter
+    filter_backends = [DjangoFilterBackend, ]
+    filter_class = RecipesFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -166,7 +170,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipes, pk=pk)
         cart = Carts.objects.filter(
                 user=request.user,
-                recipe=recipe
+                recipes=recipe
         )
         if request.method == 'POST':
             if cart.exists():

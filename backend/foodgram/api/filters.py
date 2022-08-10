@@ -1,15 +1,5 @@
 from django_filters import rest_framework as filters
-from recipes.models import Ingredients, Recipes, Tags
-
-
-class IngredientsFilter(filters.FilterSet):
-    name = filters.CharFilter(
-        field_name='name',
-        lookup_expr='istart')
-
-    class Meta:
-        model = Ingredients
-        fields = ('name',)
+from recipes.models import Recipes, Tags
 
 
 class RecipesFilter(filters.FilterSet):
@@ -23,11 +13,24 @@ class RecipesFilter(filters.FilterSet):
         queryset=Tags.objects.all()
     )
     is_favorited = filters.BooleanFilter(
-        field_name='is_favorited'
+        field_name='is_favorited',
+        method='filter',
     )
     is_in_shopping_cart = filters.BooleanFilter(
-        field_name='is_in_shopping_cart'
+        field_name='is_in_shopping_cart',
+        method='filter',
     )
+
+    def filter(self, queryset, name, value):
+        if name == 'is_in_shopping_cart' and value:
+            queryset = queryset.filter(
+                cart__user=self.request.user
+            )
+        if name == 'is_favorited' and value:
+            queryset = queryset.filter(
+                favorites__user=self.request.user
+            )
+        return queryset
 
     class Meta:
         model = Recipes
