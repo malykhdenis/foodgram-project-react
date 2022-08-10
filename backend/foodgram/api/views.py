@@ -19,7 +19,7 @@ from .serializers import (CartsSerializer, FollowsSerializer,
                           IngredientsSerializer, RecipesSerializer,
                           TagsSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import RecipesFilter
+from .filters import IngredientsFilter, RecipesFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -143,6 +143,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     search_fields = ('^name',)
     pagination_class = None
+    filter_backends = IngredientsFilter
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -150,7 +151,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     paginator_class = LimitOffsetPagination
-    permission_classes = IsAuthorOrReadOnly
+    permission_classes = [IsAuthorOrReadOnly]
     filter_backends = RecipesFilter
 
     def perform_create(self, serializer):
