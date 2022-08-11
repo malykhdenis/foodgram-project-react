@@ -118,16 +118,20 @@ class UserViewSet(viewsets.ModelViewSet):
             status=HTTPStatus.BAD_REQUEST
         )
 
-
-class UserMeViewSet(viewsets.ModelViewSet):
-    """Users' viewset."""
-    serializer_class = UserSerializer
-    pagination_class = None
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        current_user = self.request.user
-        return User.objects.filter(id=current_user.id)
+    @action(detail=False,
+            pagination_class=None,
+            url_path='me',
+            )
+    def current_user_information(self, request):
+        """Current user information."""
+        current_user = get_object_or_404(User, id=self.request.user.id)
+        if not current_user:
+            return Response(
+                    {'errors': 'Ни один пользователь не авторизован'},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+        serializer = self.get_serializer(current_user)
+        return Response(serializer.data, status=HTTPStatus.OK)
 
 
 class TagViewSet(viewsets.ModelViewSet):
