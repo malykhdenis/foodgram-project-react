@@ -1,8 +1,10 @@
 from django_filters import rest_framework as filters
+
 from recipes.models import Recipes, Tags
 
 
 class RecipesFilter(filters.FilterSet):
+    """Recipes' filter."""
     author = filters.NumberFilter(
         field_name='author__id',
         lookup_expr='exact'
@@ -21,6 +23,10 @@ class RecipesFilter(filters.FilterSet):
         method='filter',
     )
 
+    class Meta:
+        model = Recipes
+        fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
+
     def filter(self, queryset, name, value):
         if name == 'is_in_shopping_cart' and value:
             queryset = queryset.filter(
@@ -31,7 +37,3 @@ class RecipesFilter(filters.FilterSet):
                 favorites__user=self.request.user
             )
         return queryset
-
-    class Meta:
-        model = Recipes
-        fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
