@@ -7,12 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Sum
 
 from http import HTTPStatus
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
+from typing import Union
 
 from recipes.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientInRecipe, Recipe, Tag)
@@ -239,24 +241,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = request.user
-        shopping_list = {}
+        purchases: dict[str, Union[str, int]] = {}
         ingredients = IngredientInRecipe.objects.filter(
             recipe__cart__user=user).values_list(
                 'ingredient__name',
                 'amount',
                 'ingredient__measurement_unit',
-                named=True)
+                named=True).annotate(Sum('amount'))
         for ingredient in ingredients:
             name = ingredient.ingredient__name
             measurement_unit = ingredient.ingredient__measurement_unit
             amount = ingredient.amount
-            if name not in shopping_list:
-                shopping_list[name] = {
-                    'measurement_unit': measurement_unit,
-                    'amount': amount,
-                }
-            else:
-                shopping_list[name]['amount'] += amount
+            purchases[name] = {
+                'measurement_unit': measurement_unit,
+                'amount': amount,
+            }
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = (
             'attachment; filename="shoping_list.pdf"')
@@ -268,7 +267,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         pdf.setFillColor(colors.black)
         pdf.setFont('GOST', 24)
         height = 700
-        for name, data in shopping_list.items():
+        for name, data in purchases.items():
             pdf.drawString(
                 60,
                 height,
