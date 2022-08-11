@@ -190,7 +190,7 @@ class Cart(models.Model):
         on_delete=models.CASCADE,
         related_name='carts',
     )
-    recipes = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         related_name='cart',
         verbose_name='Рецепты',
@@ -204,7 +204,7 @@ class Cart(models.Model):
     class Meta:
         verbose_name = ("Список покупок")
         verbose_name_plural = ("Списки покупок")
-        unique_together = ('user', 'recipes')
+        unique_together = ('user', 'recipe')
 
     def __str__(self):
         return f'Список покупок пользователя {self.user}'

@@ -59,5 +59,5 @@ class FavoriteAdmin(admin.ModelAdmin):
 class CartAdmin(admin.ModelAdmin):
     """Admin interface for carts."""
     list_display = ('user', 'date',)
-    search_fields = ('user', 'recipes',)
-    list_filter = ('user', 'recipes',)
+    search_fields = ('user', 'recipe',)
+    list_filter = ('user', 'recipe',)
