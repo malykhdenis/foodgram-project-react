@@ -1,6 +1,6 @@
 import styles from './styles.module.css'
 
-const Ingredients = ({ ingredients }) => {
+const Ingredient = ({ ingredients }) => {
   if (!ingredients) { return null }
   return <div className={styles.ingredients}>
     <h3 className={styles['ingredients__title']}>Ингредиенты:</h3>
@@ -19,5 +19,5 @@ const Ingredients = ({ ingredients }) => {
   </div>
 }
 
-export default Ingredients
+export default Ingredient
 

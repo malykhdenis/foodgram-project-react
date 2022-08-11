@@ -14,14 +14,14 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 
-from recipes.models import (Carts, Favorites, Follows, Ingredients,
-                            IngredientsInRecipe, Recipes, Tags)
+from recipes.models import (Cart, Favorite, Follow, Ingredient,
+                            IngredientInRecipe, Recipe, Tag)
 from users.models import User
-from .serializers import (CartsSerializer, FollowsSerializer,
-                          IngredientsSerializer, RecipesSerializer,
-                          TagsSerializer, UserSerializer, UserCreateSerializer)
+from .serializers import (CartSerializer, FollowSerializer,
+                          IngredientSerializer, RecipeSerializer,
+                          TagSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import RecipesFilter
+from .filters import RecipeFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -65,9 +65,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def subscriptions(self, request):
         """Getting all subscriptions with recipes limit."""
         user = request.user
-        follows = Follows.objects.filter(user=user)
+        follows = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(follows)
-        serializer = FollowsSerializer(
+        serializer = FollowSerializer(
             pages,
             many=True,
             context={'request': request}
@@ -84,7 +84,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         author = get_object_or_404(User, id=pk)
         if request.method == 'POST':
-            if Follows.objects.filter(
+            if Follow.objects.filter(
                 user=user,
                 author=author
             ).exists():
@@ -97,16 +97,16 @@ class UserViewSet(viewsets.ModelViewSet):
                     {'errors': 'Нельзя подписаться на себя'},
                     status=HTTPStatus.BAD_REQUEST,
                 )
-            follow = Follows.objects.create(
+            follow = Follow.objects.create(
                 user=user,
                 author=author
             )
-            serializer = FollowsSerializer(
+            serializer = FollowSerializer(
                 follow,
                 context={'request': request},
             )
             return Response(serializer.data)
-        follow = Follows.objects.filter(
+        follow = Follow.objects.filter(
             user=user,
             author=author
         )
@@ -130,18 +130,18 @@ class UserMeViewSet(viewsets.ModelViewSet):
         return User.objects.filter(id=current_user.id)
 
 
-class TagsViewSet(viewsets.ModelViewSet):
-    """Tags' viewset."""
-    queryset = Tags.objects.all()
-    serializer_class = TagsSerializer
+class TagViewSet(viewsets.ModelViewSet):
+    """Tag' viewset."""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
     pagination_class = None
     permission_classes = [IsAdminOrReadOnly]
 
 
-class IngredientsViewSet(viewsets.ModelViewSet):
-    """Ingredients' viewset."""
-    queryset = Ingredients.objects.all()
-    serializer_class = IngredientsSerializer
+class IngredientViewSet(viewsets.ModelViewSet):
+    """Ingredient' viewset."""
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly, ]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     search_fields = ('^name',)
@@ -149,14 +149,14 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, ]
 
 
-class RecipesViewSet(viewsets.ModelViewSet):
-    """Ingredients' viewset."""
-    queryset = Recipes.objects.all()
-    serializer_class = RecipesSerializer
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Ingredient' viewset."""
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
     paginator_class = LimitOffsetPagination
     permission_classes = [IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend, ]
-    filter_class = RecipesFilter
+    filter_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -167,8 +167,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
-        cart = Carts.objects.filter(
+        recipe = get_object_or_404(Recipe, pk=pk)
+        cart = Cart.objects.filter(
                 user=request.user,
                 recipes=recipe
         )
@@ -178,11 +178,11 @@ class RecipesViewSet(viewsets.ModelViewSet):
                     {'errors': 'Этот рецепт уже есть в списке покупок'},
                     status=HTTPStatus.BAD_REQUEST,
                 )
-            Carts.objects.create(
+            Cart.objects.create(
                 user=request.user,
                 recipes=recipe
             )
-            serializer = CartsSerializer(recipe)
+            serializer = CartSerializer(recipe)
             return Response(serializer.data)
         if not cart.exists():
             return Response(
@@ -198,8 +198,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipes, pk=pk)
-        favorite_recipe = Favorites.objects.filter(
+        recipe = get_object_or_404(Recipe, pk=pk)
+        favorite_recipe = Favorite.objects.filter(
             user=request.user,
             recipe=recipe
         )
@@ -209,8 +209,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
                     {'errors': 'Рецепт уже в избранном'},
                     status=HTTPStatus.BAD_REQUEST
                 )
-            Favorites.objects.create(user=request.user, recipe=recipe)
-            serializer = CartsSerializer(recipe)
+            Favorite.objects.create(user=request.user, recipe=recipe)
+            serializer = CartSerializer(recipe)
             return Response(serializer.data)
         if not favorite_recipe.exists():
             return Response(
@@ -228,7 +228,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = request.user
         shopping_list = {}
-        ingredients = IngredientsInRecipe.objects.filter(
+        ingredients = IngredientInRecipe.objects.filter(
             recipe__cart__user=user).values_list(
                 'ingredient__name',
                 'amount',

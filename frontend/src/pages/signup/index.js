@@ -4,7 +4,7 @@ import { useFormWithValidation } from '../../utils'
 import { Redirect } from 'react-router-dom'
 import { useContext } from 'react'
 import { AuthContext } from '../../contexts'
-import MetaTags from 'react-meta-tags'
+import MetaTag from 'react-meta-tags'
 
 const SignUp = ({ onSignUp }) => {
   const { values, handleChange, errors, isValid, resetForm } = useFormWithValidation()
@@ -13,11 +13,11 @@ const SignUp = ({ onSignUp }) => {
   return <Main>
     {authContext && <Redirect to='/recipes' />}
     <Container>
-      <MetaTags>
+      <MetaTag>
         <title>Регистрация</title>
         <meta name="description" content="Продуктовый помощник - Регистрация" />
         <meta property="og:title" content="Регистрация" />
-      </MetaTags>
+      </MetaTag>
       <Title title='Регистрация' />
       <Form className={styles.form} onSubmit={e => {
         e.preventDefault()

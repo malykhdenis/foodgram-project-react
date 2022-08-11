@@ -3,10 +3,10 @@ from csv import DictReader
 from os.path import exists
 from django.contrib.staticfiles.finders import find
 from django.core.management import BaseCommand
-from recipes.models import Ingredients
+from recipes.models import Ingredient
 
 DATA_MODEL = {
-    'ingredients': Ingredients,
+    'ingredients': Ingredient,
 }
 
 
@@ -34,8 +34,8 @@ def check_db(model):
 
 
 def objects_creator(model, row):
-    if model == Ingredients:
-        Ingredients.objects.create(
+    if model == Ingredient:
+        Ingredient.objects.create(
             name=row['name'],
             measurement_unit=row['measurement_unit'],
         )

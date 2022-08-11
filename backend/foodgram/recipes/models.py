@@ -3,7 +3,7 @@ from django.db import models
 from users.models import User
 
 
-class Tags(models.Model):
+class Tag(models.Model):
     """Модель тегов."""
     name = models.CharField(
         verbose_name='Название',
@@ -34,14 +34,13 @@ class Tags(models.Model):
         return self.name
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     """Модель ингредиентов."""
     name = models.CharField(
         verbose_name='Название',
         help_text='Введите название ингредиента',
         max_length=200,
         blank=False,
-        # unique=True,
     )
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
@@ -58,7 +57,7 @@ class Ingredients(models.Model):
         return self.name
 
 
-class Recipes(models.Model):
+class Recipe(models.Model):
     """Модель рецептов."""
     author = models.ForeignKey(
         User,
@@ -66,14 +65,12 @@ class Recipes(models.Model):
         related_name='recipes',
         verbose_name='Автор',
         help_text='Выберите автора',
-        blank=False,
         null=True,
     )
     name = models.CharField(
         verbose_name='Название',
         help_text='Введите название блюда',
         max_length=200,
-        blank=False,
     )
     image = models.ImageField(
         verbose_name='Изображение',
@@ -81,25 +78,21 @@ class Recipes(models.Model):
     text = models.TextField(
         verbose_name='Описание',
         help_text='Введите описание рецепта',
-        blank=False,
     )
     ingredients = models.ManyToManyField(
-        Ingredients,
-        through='IngredientsInRecipe',
+        Ingredient,
+        through='IngredientInRecipe',
         related_name='recipes',
         help_text='Выберите ингридиенты',
-        blank=False,
     )
     tags = models.ManyToManyField(
-        Tags,
+        Tag,
         related_name='recipes',
         help_text='Введите тег',
-        blank=False,
     )
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
         help_text='Введите время приготовления в минутах',
-        blank=False,
         null=True,
     )
 
@@ -111,21 +104,20 @@ class Recipes(models.Model):
         return self.name
 
 
-class IngredientsInRecipe(models.Model):
+class IngredientInRecipe(models.Model):
     """Модель ингредиентов в рецепте."""
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
     )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
     )
-    amount = models.IntegerField(
+    amount = models.PositiveIntegerField(
         verbose_name='Количество',
-        blank=False,
         null=True,
         help_text='Введите количество ингридиента'
     )
@@ -133,12 +125,13 @@ class IngredientsInRecipe(models.Model):
     class Meta:
         verbose_name = ("Ингредиент в рецепте")
         verbose_name_plural = ("Ингредиенты в рецепте")
+        unique_together = ('ingredient', 'recipe')
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'
 
 
-class Follows(models.Model):
+class Follow(models.Model):
     """Модель подписок."""
     user = models.ForeignKey(
         User,
@@ -160,12 +153,13 @@ class Follows(models.Model):
     class Meta:
         verbose_name = ("Подписка")
         verbose_name_plural = ("Подписки")
+        unique_together = ('user', 'author')
 
     def __str__(self):
         return f'{self.user} подписан на {self.author}'
 
 
-class Favorites(models.Model):
+class Favorite(models.Model):
     """Модель избранных."""
     user = models.ForeignKey(
         User,
@@ -174,7 +168,7 @@ class Favorites(models.Model):
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
         related_name='favorites',
@@ -183,12 +177,13 @@ class Favorites(models.Model):
     class Meta:
         verbose_name = ("Избранное")
         verbose_name_plural = ("Избранное")
+        unique_together = ('user', 'recipe')
 
     def __str__(self):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
 
 
-class Carts(models.Model):
+class Cart(models.Model):
     """Модель списков покупок."""
     user = models.ForeignKey(
         User,
@@ -196,7 +191,7 @@ class Carts(models.Model):
         related_name='carts',
     )
     recipes = models.ForeignKey(
-        Recipes,
+        Recipe,
         related_name='cart',
         verbose_name='Рецепты',
         on_delete=models.CASCADE,
@@ -209,6 +204,7 @@ class Carts(models.Model):
     class Meta:
         verbose_name = ("Список покупок")
         verbose_name_plural = ("Списки покупок")
+        unique_together = ('user', 'recipes')
 
     def __str__(self):
         return f'Список покупок пользователя {self.user}'

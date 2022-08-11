@@ -522,7 +522,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/UserWithRecipes'
+                      $ref: '#/components/schemas/UserWithRecipe'
                     description: 'Список объектов текущей страницы'
           description: ''
         '401':
@@ -553,7 +553,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserWithRecipes'
+                $ref: '#/components/schemas/UserWithRecipe'
           description: 'Подписка успешно создана'
         '400':
           description: 'Ошибка подписки (Например, если уже подписан или при подписке на себя самого)'
@@ -731,7 +731,7 @@ components:
           example: false
       required:
         - username
-    UserWithRecipes:
+    UserWithRecipe:
       description: 'Расширенный объект пользователя с рецептами'
       type: object
       properties:

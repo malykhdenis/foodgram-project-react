@@ -14,7 +14,7 @@ import Input from './input'
 import AccountMenu from './account-menu'
 import Nav from './nav'
 import Tag from './tag'
-import TagsContainer from './tags-container'
+import TagContainer from './tags-container'
 import Textarea from './textarea'
 import Checkbox from './checkbox'
 import CheckboxGroup from './checkbox-group'
@@ -24,7 +24,7 @@ import PurchaseList from './purchase-list'
 import Subscription from './subscription'
 import SubscriptionList from './subscription-list'
 import FileInput from './file-input'
-import IngredientsSearch from './ingredients-search'
+import IngredientSearch from './ingredients-search'
 
 export {
   Header,
@@ -43,7 +43,7 @@ export {
   AccountMenu,
   Nav,
   Tag,
-  TagsContainer,
+  TagContainer,
   Textarea,
   Checkbox,
   CheckboxGroup,
@@ -53,5 +53,5 @@ export {
   Subscription,
   SubscriptionList,
   FileInput,
-  IngredientsSearch
+  IngredientSearch
 }
