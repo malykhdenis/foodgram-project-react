@@ -1,3 +1,4 @@
+from enum import unique
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -93,11 +94,16 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shoping_cart', 'name', 'image', 'text',
                   'cooking_time')
         model = Recipe
-        validators = [UniqueTogetherValidator(
-            queryset=Recipe.objects.all(),
-            fields=['ingredient', 'recipe']
-            )
-                      ]
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Recipe.objects.all(),
+                fields=['ingredient', 'recipe'],
+                ),
+            # UniqueTogetherValidator(
+            #     queryset=Recipe.objects.all(),
+            #     fields=['tags', 'recipes'],
+            #     )
+            #           ]
 
     def get_is_favorited(self, obj):
         """Checking if recipe is favorited."""
@@ -130,7 +136,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         tags = self.initial_data.get('tags')
         instance.tags.set(tags)
-        IngredientInRecipe.objects.filter(recipe=instance).all().delete()
+        IngredientInRecipe.objects.filter(recipe=instance).delete()
         ingredients = self.initial_data.get('ingredients')
         for ingredient in ingredients:
             IngredientInRecipe.objects.create(
@@ -144,22 +150,22 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def validate(self, data):
-        ingredients_id_list = []
-        if not data:
-            raise serializers.ValidationError(
-                'В вашем рецепте должен быть хотя бы один ингредиент')
-        for ingredient in data:
-            if int(ingredient.get('amount')) <= 0:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть больше нуля!')
-            ingredients_id_list.append(ingredient['id'])
-        unique_ingredients = set(ingredients_id_list)
-        if len(ingredients_id_list) > len(unique_ingredients):
-            raise serializers.ValidationError(
-                'Ингредиенты не должны повторяться'
-            )
-        return data
+    # def validate_ingredients(self, data):
+    #     ingredients_id_list = []
+    #     if not data:
+    #         raise serializers.ValidationError(
+    #             'В вашем рецепте должен быть хотя бы один ингредиент')
+    #     for ingredient in data:
+    #         if int(ingredient.get('amount')) <= 0:
+    #             raise serializers.ValidationError(
+    #                 'Количество ингредиента должно быть больше нуля!')
+    #         ingredients_id_list.append(ingredient['id'])
+    #     unique_ingredients = set(ingredients_id_list)
+    #     if len(ingredients_id_list) > len(unique_ingredients):
+    #         raise serializers.ValidationError(
+    #             'Ингредиенты не должны повторяться'
+    #         )
+    #     return data
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -205,3 +211,13 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, obj):
         """Recipe' count."""
         return Recipe.objects.filter(author=obj.author).count()
+
+
+class SetPasswordSerializer(serializers.ModelSerializer):
+    """Serializer for setting password checking."""
+    new_password = serializers.CharField()
+    current_password = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ('new_password', 'current_password')

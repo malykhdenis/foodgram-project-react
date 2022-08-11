@@ -21,7 +21,8 @@ from recipes.models import (Cart, Favorite, Follow, Ingredient,
 from users.models import User
 from .serializers import (CartSerializer, FollowSerializer,
                           IngredientSerializer, RecipeSerializer,
-                          TagSerializer, UserSerializer, UserCreateSerializer)
+                          SetPasswordSerializer, TagSerializer, UserSerializer,
+                          UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .filters import RecipeFilter
 
@@ -44,6 +45,8 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def set_password(self, request):
         """Password changing."""
+        serializer = SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         current_user = self.request.user
         if not current_user.check_password(
             request.data.get('current_password')
