@@ -1,6 +1,7 @@
-from enum import unique
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.serializers import ValidationError
 
 from drf_extra_fields.fields import Base64ImageField
 
@@ -83,7 +84,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Recipe' serializer."""
     tags = TagSerializer(read_only=True, many=True)
     ingredients = IngredientInRecipeSerializer(
-        source='ingredientsinrecipe_set', many=True, read_only=True)
+        source='ingredientinrecipe_set', many=True, read_only=True)
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shoping_cart = serializers.SerializerMethodField()
@@ -94,16 +95,24 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shoping_cart', 'name', 'image', 'text',
                   'cooking_time')
         model = Recipe
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Recipe.objects.all(),
-                fields=['ingredient', 'recipe'],
-                ),
-            # UniqueTogetherValidator(
-            #     queryset=Recipe.objects.all(),
-            #     fields=['tags', 'recipes'],
-            #     )
-            #           ]
+
+    def check_double_item(self, data):
+        validated_items = []
+        for item in data:
+            if item in validated_items:
+                raise ValidationError('Ошибка оригинальности поля')
+            validated_items.append(item)
+
+    def validate(self, data):
+        tags = self.initial_data.get('tags')
+        ingredients = self.initial_data.get('ingredients')
+        ingredients_id = [i['id'] for i in ingredients]
+        pass
+        self.check_double_item(tags)
+        self.check_double_item(ingredients_id)
+        data['tags'] = tags
+        data['ingredients'] = ingredients
+        return data
 
     def get_is_favorited(self, obj):
         """Checking if recipe is favorited."""
@@ -117,55 +126,44 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous or not user.carts.exists():
             return False
-        return Recipe.objects.filter(carts__user=user, id=obj.id).exists()
+        return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
 
     def create(self, validated_data):
         """Creating new recipe and relations ingredients in recipe."""
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        ingredients = self.initial_data.get('ingredients')
-        tags = self.initial_data.get('tags')
+        for ingredient in ingredients:
+            ingredient_instance = get_object_or_404(
+                Ingredient,
+                pk=ingredient.get('id')
+            )
+            IngredientInRecipe.objects.get_or_create(
+                ingredient=ingredient_instance,
+                recipe=recipe,
+                amount=ingredient.get('amount')
+            )
         recipe.tags.set(tags)
+        return recipe
+    
+    def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientInRecipe.objects.create(
-                recipe=recipe, ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),)
-        return recipe
+                recipe=recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'), )
 
     def update(self, instance, validated_data):
         """Updating recipe and relations ingredients in recipe."""
-        instance.tags.clear()
-        tags = self.initial_data.get('tags')
-        instance.tags.set(tags)
-        IngredientInRecipe.objects.filter(recipe=instance).delete()
-        ingredients = self.initial_data.get('ingredients')
-        for ingredient in ingredients:
-            IngredientInRecipe.objects.create(
-                recipe=instance, ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),)
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time)
-        instance.save()
-        return instance
-
-    # def validate_ingredients(self, data):
-    #     ingredients_id_list = []
-    #     if not data:
-    #         raise serializers.ValidationError(
-    #             'В вашем рецепте должен быть хотя бы один ингредиент')
-    #     for ingredient in data:
-    #         if int(ingredient.get('amount')) <= 0:
-    #             raise serializers.ValidationError(
-    #                 'Количество ингредиента должно быть больше нуля!')
-    #         ingredients_id_list.append(ingredient['id'])
-    #     unique_ingredients = set(ingredients_id_list)
-    #     if len(ingredients_id_list) > len(unique_ingredients):
-    #         raise serializers.ValidationError(
-    #             'Ингредиенты не должны повторяться'
-    #         )
-    #     return data
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.create_ingredients(ingredients, instance)
+        if 'tags' in validated_data:
+            instance.tags.set(
+                validated_data.pop('tags'))
+        return super().update(
+            instance, validated_data)
 
 
 class CartSerializer(serializers.ModelSerializer):
