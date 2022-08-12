@@ -145,7 +145,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
         recipe.tags.set(tags)
         return recipe
-    
+
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientInRecipe.objects.create(
