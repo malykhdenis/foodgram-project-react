@@ -133,37 +133,42 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        for ingredient in ingredients:
-            ingredient_instance = get_object_or_404(
-                Ingredient,
-                pk=ingredient.get('id')
-            )
-            IngredientInRecipe.objects.get_or_create(
-                ingredient=ingredient_instance,
+        new_ingredients = [
+            IngredientInRecipe(
                 recipe=recipe,
-                amount=ingredient.get('amount')
+                ingredient=get_object_or_404(
+                    Ingredient,
+                    id=ingredient['id'],
+                ),
+                amount=ingredient['amount'],
             )
+            for ingredient in ingredients
+        ]
+        IngredientInRecipe.objects.bulk_create(objs=new_ingredients)
         recipe.tags.set(tags)
         return recipe
 
-    def create_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            IngredientInRecipe.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'), )
-
     def update(self, instance, validated_data):
         """Updating recipe and relations ingredients in recipe."""
-        if 'ingredients' in validated_data:
-            ingredients = validated_data.pop('ingredients')
-            instance.ingredients.clear()
-            self.create_ingredients(ingredients, instance)
-        if 'tags' in validated_data:
-            instance.tags.set(
-                validated_data.pop('tags'))
-        return super().update(
-            instance, validated_data)
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance.ingredients.clear()
+        instance.tags.clear()
+        IngredientInRecipe.objects.filter(recipe=instance).delete()
+        new_ingredients = [
+            IngredientInRecipe(
+                recipe=instance,
+                ingredient=get_object_or_404(
+                    Ingredient,
+                    id=ingredient['id'],
+                ),
+                amount=ingredient['amount'],
+            )
+            for ingredient in ingredients
+        ]
+        IngredientInRecipe.objects.bulk_create(objs=new_ingredients)
+        instance.tags.set(tags)
+        return super().update(instance, validated_data)
 
 
 class CartSerializer(serializers.ModelSerializer):
