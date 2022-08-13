@@ -151,11 +151,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
         data['ingredients'] = ingredients
         return data
 
-    def create(self, validated_data):
-        """Creating new recipe and relations ingredients in recipe."""
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+    def create_ingredients_in_recipe(self, ingredients, recipe):
         new_ingredients = [
             IngredientInRecipe(
                 recipe=recipe,
@@ -168,6 +164,16 @@ class RecipePostSerializer(serializers.ModelSerializer):
             for ingredient in ingredients
         ]
         IngredientInRecipe.objects.bulk_create(objs=new_ingredients)
+
+    def create(self, validated_data):
+        """Creating new recipe and relations ingredients in recipe."""
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        self.create_ingredients_in_recipe(
+            ingredients=ingredients,
+            recipe=recipe,
+        )
         recipe.tags.set(tags)
         return recipe
 
@@ -178,18 +184,10 @@ class RecipePostSerializer(serializers.ModelSerializer):
         instance.ingredients.clear()
         instance.tags.clear()
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        new_ingredients = [
-            IngredientInRecipe(
-                recipe=instance,
-                ingredient=get_object_or_404(
-                    Ingredient,
-                    id=ingredient['id'],
-                ),
-                amount=ingredient['amount'],
-            )
-            for ingredient in ingredients
-        ]
-        IngredientInRecipe.objects.bulk_create(objs=new_ingredients)
+        self.create_ingredients_in_recipe(
+            ingredients=ingredients,
+            recipe=instance,
+        )
         instance.tags.set(tags)
         return super().update(instance, validated_data)
 
