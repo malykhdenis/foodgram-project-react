@@ -1,3 +1,6 @@
+from http import HTTPStatus
+from typing import Union
+
 from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
@@ -8,13 +11,10 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
-
-from http import HTTPStatus
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
-from typing import Union
 
 from recipes.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientInRecipe, Recipe, Tag)
@@ -49,7 +49,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         current_user = self.request.user
         if not current_user.check_password(
-            request.data.get('current_password')
+            serializer.validated_data.get('current_password')
         ):
             return Response(
                 {'errors': 'Неверный текущий пароль'},
@@ -129,7 +129,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
     def current_user_information(self, request):
         """Current user information."""
-        current_user = get_object_or_404(User, id=self.request.user.id)
+        current_user = request.user
         if not current_user:
             return Response(
                     {'errors': 'Ни один пользователь не авторизован'},
@@ -246,15 +246,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         purchases: dict[str, Union[str, int]] = {}
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__cart__user=user).values_list(
+            recipe__cart__user=user).values(
                 'ingredient__name',
-                'amount',
-                'ingredient__measurement_unit',
-                named=True).annotate(Sum('amount'))
+                'ingredient__measurement_unit'
+                ).annotate(amount_in_cart=Sum('amount'))
         for ingredient in ingredients:
-            name = ingredient.ingredient__name
-            measurement_unit = ingredient.ingredient__measurement_unit
-            amount = ingredient.amount
+            name = ingredient.get('ingredient__name')
+            measurement_unit = ingredient.get('ingredient__measurement_unit')
+            amount = ingredient.get('amount_in_cart')
             purchases[name] = {
                 'measurement_unit': measurement_unit,
                 'amount': amount,
