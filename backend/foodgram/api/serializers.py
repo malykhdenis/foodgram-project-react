@@ -81,7 +81,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Recipe' serializer."""
-    tags = TagSerializer(read_only=True, many=True)
+    tags = TagSerializer(many=True)
     ingredients = IngredientInRecipeSerializer(
         source='ingredientinrecipe_set', many=True, read_only=True)
     author = UserSerializer(read_only=True)
@@ -94,24 +94,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shoping_cart', 'name', 'image', 'text',
                   'cooking_time')
         model = Recipe
-
-    def check_double_item(self, data):
-        validated_items = []
-        for item in data:
-            if item in validated_items:
-                raise ValidationError('Ошибка оригинальности поля')
-            validated_items.append(item)
-
-    def validate(self, data):
-        tags = self.initial_data.get('tags')
-        ingredients = self.initial_data.get('ingredients')
-        ingredients_id = [i['id'] for i in ingredients]
-        pass
-        self.check_double_item(tags)
-        self.check_double_item(ingredients_id)
-        data['tags'] = tags
-        data['ingredients'] = ingredients
-        return data
 
     def get_is_favorited(self, obj):
         """Checking if recipe is favorited."""
@@ -126,6 +108,48 @@ class RecipeSerializer(serializers.ModelSerializer):
         if user.is_anonymous or not user.carts.exists():
             return False
         return Recipe.objects.filter(cart__user=user, id=obj.id).exists()
+
+
+class IngredientPostSerializer(serializers.ModelSerializer):
+    """Ingredients' serializer for validating before POST/PATCH Recipes."""
+    id = serializers.IntegerField(min_value=1)
+    amount = serializers.IntegerField(min_value=0)
+
+    class Meta:
+        model = IngredientInRecipe
+        fields = ('id', 'amount')
+
+
+class RecipePostSerializer(serializers.ModelSerializer):
+    """POST/PATCH for Recipes."""
+    image = Base64ImageField()
+    ingredients = IngredientPostSerializer(many=True)
+    tags = serializers.ListField(child=serializers.IntegerField(min_value=1))
+
+    class Meta:
+        model = Recipe
+        fields = (
+            "image",
+            "tags",
+            "ingredients",
+        )
+
+    def check_double_item(self, data):
+        validated_items = []
+        for item in data:
+            if item in validated_items:
+                raise ValidationError('Ошибка оригинальности поля')
+            validated_items.append(item)
+
+    def validate(self, data):
+        tags = data.get('tags')
+        ingredients = data.get('ingredients')
+        ingredients_id = [i['id'] for i in ingredients]
+        self.check_double_item(tags)
+        self.check_double_item(ingredients_id)
+        data['tags'] = tags
+        data['ingredients'] = ingredients
+        return data
 
     def create(self, validated_data):
         """Creating new recipe and relations ingredients in recipe."""
@@ -168,6 +192,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         IngredientInRecipe.objects.bulk_create(objs=new_ingredients)
         instance.tags.set(tags)
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        return RecipeSerializer(instance, context=self.context).data
 
 
 class CartSerializer(serializers.ModelSerializer):

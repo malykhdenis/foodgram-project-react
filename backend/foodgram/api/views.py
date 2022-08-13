@@ -20,9 +20,9 @@ from recipes.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientInRecipe, Recipe, Tag)
 from users.models import User
 from .serializers import (CartSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          SetPasswordSerializer, TagSerializer, UserSerializer,
-                          UserCreateSerializer)
+                          IngredientSerializer, RecipePostSerializer,
+                          RecipeSerializer, SetPasswordSerializer,
+                          TagSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .filters import RecipeFilter
 
@@ -169,6 +169,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return RecipePostSerializer
+        return RecipeSerializer
 
     def create_object(self, model, user, pk):
         """Create new object."""
