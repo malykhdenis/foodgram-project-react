@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['84.201.137.177', 'malykhdk.sytes.net']
 
 INSTALLED_APPS = [
     'recipes.apps.RecipeConfig',
@@ -124,6 +124,9 @@ AUTH_USER_MODEL = 'users.User'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DJOSER = {
     'LOGIN_FIELD': 'email'
