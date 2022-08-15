@@ -1,61 +1,61 @@
 import { Card, Title, Pagination, CardList, Container, Main, CheckboxGroup  } from '../../components'
 import styles from './styles.module.css'
-import { useRecipes } from '../../utils/index.js'
+import { useRecipe } from '../../utils/index.js'
 import { useEffect } from 'react'
 import api from '../../api'
-import MetaTags from 'react-meta-tags'
+import MetaTag from 'react-meta-tags'
 
-const Favorites = ({ updateOrders }) => {
+const Favorite = ({ updateOrders }) => {
   const {
     recipes,
-    setRecipes,
+    setRecipe,
     recipesCount,
-    setRecipesCount,
+    setRecipeCount,
     recipesPage,
-    setRecipesPage,
+    setRecipePage,
     tagsValue,
-    handleTagsChange,
-    setTagsValue,
+    handleTagChange,
+    setTagValue,
     handleLike,
     handleAddToCart
-  } = useRecipes()
+  } = useRecipe()
   
-  const getRecipes = ({ page = 1, tags }) => {
+  const getRecipe = ({ page = 1, tags }) => {
     api
-      .getRecipes({ page, is_favorited: Number(true), tags })
+      .getRecipe({ page, is_favorited: Number(true), tags })
       .then(res => {
         const { results, count } = res
-        setRecipes(results)
-        setRecipesCount(count)
+        setRecipe(results)
+        setRecipeCount(count)
       })
   }
 
   useEffect(_ => {
-    getRecipes({ page: recipesPage, tags: tagsValue })
+    getRecipe({ page: recipesPage, tags: tagsValue })
   }, [recipesPage, tagsValue])
 
   useEffect(_ => {
-    api.getTags()
+    api.getTag()
       .then(tags => {
-        setTagsValue(tags.map(tag => ({ ...tag, value: true })))
+        setTagValue(tags.map(tag => ({ ...tag, value: true })))
       })
   }, [])
 
 
   return <Main>
     <Container>
-      <MetaTags>
+      <MetaTag>
         <title>Избранное</title>
         <meta name="description" content="Продуктовый помощник - Избранное" />
         <meta property="og:title" content="Избранное" />
-      </MetaTags>
+      </MetaTag>
       <div className={styles.title}>
         <Title title='Избранное' />
         <CheckboxGroup
           values={tagsValue}
           handleChange={value => {
-            setRecipesPage(1)
-            handleTagsChange(value)
+            setRecipePage(1)
+            handleTagChange(value)
           }}
         />
       </div>
@@ -72,11 +72,11 @@ const Favorites = ({ updateOrders }) => {
         count={recipesCount}
         limit={6}
         page={recipesPage}
-        onPageChange={page => setRecipesPage(page)}
+        onPageChange={page => setRecipePage(page)}
       />
     </Container>
   </Main>
 }
 
-export default Favorites
+export default Favorite
 

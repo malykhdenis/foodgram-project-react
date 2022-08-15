@@ -1,62 +1,62 @@
 import { Card, Title, Pagination, CardList, Container, Main, CheckboxGroup  } from '../../components'
 import styles from './styles.module.css'
-import { useRecipes } from '../../utils/index.js'
+import { useRecipe } from '../../utils/index.js'
 import { useEffect } from 'react'
 import api from '../../api'
-import MetaTags from 'react-meta-tags'
+import MetaTag from 'react-meta-tags'
 
 const HomePage = ({ updateOrders }) => {
   const {
     recipes,
-    setRecipes,
+    setRecipe,
     recipesCount,
-    setRecipesCount,
+    setRecipeCount,
     recipesPage,
-    setRecipesPage,
+    setRecipePage,
     tagsValue,
-    setTagsValue,
-    handleTagsChange,
+    setTagValue,
+    handleTagChange,
     handleLike,
     handleAddToCart
-  } = useRecipes()
+  } = useRecipe()
 
 
-  const getRecipes = ({ page = 1, tags }) => {
+  const getRecipe = ({ page = 1, tags }) => {
     api
-      .getRecipes({ page, tags })
+      .getRecipe({ page, tags })
       .then(res => {
         const { results, count } = res
-        setRecipes(results)
-        setRecipesCount(count)
+        setRecipe(results)
+        setRecipeCount(count)
       })
   }
 
   useEffect(_ => {
-    getRecipes({ page: recipesPage, tags: tagsValue })
+    getRecipe({ page: recipesPage, tags: tagsValue })
   }, [recipesPage, tagsValue])
 
   useEffect(_ => {
-    api.getTags()
+    api.getTag()
       .then(tags => {
-        setTagsValue(tags.map(tag => ({ ...tag, value: true })))
+        setTagValue(tags.map(tag => ({ ...tag, value: true })))
       })
   }, [])
 
 
   return <Main>
     <Container>
-      <MetaTags>
+      <MetaTag>
         <title>Рецепты</title>
         <meta name="description" content="Продуктовый помощник - Рецепты" />
         <meta property="og:title" content="Рецепты" />
-      </MetaTags>
+      </MetaTag>
       <div className={styles.title}>
         <Title title='Рецепты' />
         <CheckboxGroup
           values={tagsValue}
           handleChange={value => {
-            setRecipesPage(1)
-            handleTagsChange(value)
+            setRecipePage(1)
+            handleTagChange(value)
           }}
         />
       </div>
@@ -73,7 +73,7 @@ const HomePage = ({ updateOrders }) => {
         count={recipesCount}
         limit={6}
         page={recipesPage}
-        onPageChange={page => setRecipesPage(page)}
+        onPageChange={page => setRecipePage(page)}
       />
     </Container>
   </Main>
