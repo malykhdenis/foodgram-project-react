@@ -12,7 +12,7 @@ const countForm = (number, titles) => {
 
 const Subscription = ({ email, first_name, last_name, username, removeSubscription, recipes_count, id, recipes }) => {
   const shouldShowButton = recipes_count  > 3
-  const moreRecipes = recipes_count - 3
+  const moreRecipe = recipes_count - 3
   return <div className={styles.subscription}>
     <div className={styles.subscriptionHeader}>
       <h2 className={styles.subscriptionTitle}>
@@ -39,7 +39,7 @@ const Subscription = ({ email, first_name, last_name, username, removeSubscripti
         {shouldShowButton && <li className={styles.subscriptionMore}>
           <LinkComponent
             className={styles.subscriptionLink}
-            title={`Еще ${moreRecipes} ${countForm(moreRecipes, ['рецепт', 'рецепта', 'рецептов'])}...`}
+            title={`Еще ${moreRecipe} ${countForm(moreRecipe, ['рецепт', 'рецепта', 'рецептов'])}...`}
             href={`/user/${id}`}
           />
         </li>}

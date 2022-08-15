@@ -13,7 +13,7 @@ import {
   Cart,
   SignIn,
   Subscriptions,
-  Favorites,
+  Favorite,
   SingleCard,
   SignUp,
   RecipeEdit,
@@ -129,7 +129,7 @@ function App() {
 
   const getOrders = () => {
     api
-      .getRecipes({
+      .getRecipe({
         page: 1,
         is_in_shopping_cart: Number(true)
       })
@@ -207,7 +207,7 @@ function App() {
           <ProtectedRoute
             exact
             path='/favorites'
-            component={Favorites}
+            component={Favorite}
             loggedIn={loggedIn}
             updateOrders={updateOrders}
           />

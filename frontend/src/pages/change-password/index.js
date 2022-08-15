@@ -4,7 +4,7 @@ import { useFormWithValidation } from '../../utils'
 import { AuthContext } from '../../contexts'
 import { Redirect } from 'react-router-dom'
 import { useContext } from 'react'
-import MetaTags from 'react-meta-tags'
+import MetaTag from 'react-meta-tags'
 
 const ChangePassword = ({ onPasswordChange }) => {
   const { values, handleChange, errors, isValid, resetForm } = useFormWithValidation()
@@ -12,11 +12,11 @@ const ChangePassword = ({ onPasswordChange }) => {
 
   return <Main>
     <Container>
-      <MetaTags>
+      <MetaTag>
         <title>Изменить пароль</title>
         <meta name="description" content="Продуктовый помощник - Изменить пароль" />
         <meta property="og:title" content="Изменить пароль" />
-      </MetaTags>
+      </MetaTag>
       <Title title='Изменить пароль' />
       <Form
         className={styles.form}
