@@ -11,7 +11,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['84.201.137.177', 'malykhdk.sytes.net']
+ALLOWED_HOSTS = ['84.201.137.177',
+                 'malykhdk.sytes.net',
+                 '127.0.0.1',
+                 'localhost',
+                 ]
 
 INSTALLED_APPS = [
     'recipes.apps.RecipeConfig',
@@ -98,9 +102,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

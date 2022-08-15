@@ -132,6 +132,3 @@ dmypy.json
 .idea
 
 .vscode/
-
-# node's staff
-frontend/node_modules/
