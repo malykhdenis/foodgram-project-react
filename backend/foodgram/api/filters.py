@@ -1,14 +1,11 @@
 from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter
 
 from recipes.models import Recipe, Tag
 
 
 class RecipeFilter(filters.FilterSet):
     """Recipe' filter."""
-    author = filters.NumberFilter(
-        field_name='author__id',
-        lookup_expr='exact'
-    )
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',
@@ -37,3 +34,8 @@ class RecipeFilter(filters.FilterSet):
                 favorites__user=self.request.user
             )
         return queryset
+
+
+class IngredientSearchFilter(SearchFilter):
+    """Ingredients' filter."""
+    search_param = 'name'

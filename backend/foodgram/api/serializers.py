@@ -86,12 +86,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='ingredientinrecipe_set', many=True, read_only=True)
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
-    is_in_shoping_cart = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
 
     class Meta:
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
-                  'is_in_shoping_cart', 'name', 'image', 'text',
+                  'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
         model = Recipe
 
@@ -102,7 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return Recipe.objects.filter(favorites__user=user, id=obj.id).exists()
 
-    def get_is_in_shoping_cart(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         """Checking if recipe is in shoping cart. """
         user = self.context.get('request').user
         if user.is_anonymous or not user.carts.exists():
@@ -128,11 +128,8 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = (
-            "image",
-            "tags",
-            "ingredients",
-        )
+        fields = ('id', 'tags', 'author', 'ingredients', 'name', 'image',
+                  'text', 'cooking_time')
 
     def check_double_item(self, data):
         validated_items = []

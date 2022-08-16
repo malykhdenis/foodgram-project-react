@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from typing import Union
 
-from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
@@ -24,7 +23,8 @@ from .serializers import (CartSerializer, FollowSerializer,
                           RecipeSerializer, SetPasswordSerializer,
                           TagSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientSearchFilter
+from .pagination import LimitPageNumberPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -153,17 +153,16 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly, ]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    filter_backends = [DjangoFilterBackend, IngredientSearchFilter, ]
     search_fields = ('^name',)
     pagination_class = None
-    filter_backends = [filters.SearchFilter, ]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Ingredient' viewset."""
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().order_by('date')
     serializer_class = RecipeSerializer
-    paginator_class = LimitOffsetPagination
+    paginator_class = LimitPageNumberPagination
     permission_classes = [IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend, ]
     filter_class = RecipeFilter

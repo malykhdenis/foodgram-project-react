@@ -90,6 +90,11 @@ class Recipe(models.Model):
         help_text='Введите время приготовления в минутах',
         null=True,
     )
+    date = models.DateTimeField(
+        'Дата создания рецепта',
+        auto_now_add=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
