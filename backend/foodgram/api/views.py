@@ -160,7 +160,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Ingredient' viewset."""
-    queryset = Recipe.objects.all()  # .order_by('data')
+    queryset = Recipe.objects.all().order_by('date')
     serializer_class = RecipeSerializer
     paginator_class = LimitPageNumberPagination
     permission_classes = [IsAuthorOrReadOnly]

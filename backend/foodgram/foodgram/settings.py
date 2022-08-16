@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework.authtoken',
     'djoser',
+    # 'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -105,7 +106,7 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -132,3 +133,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DJOSER = {
     'LOGIN_FIELD': 'email'
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
