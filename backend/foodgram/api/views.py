@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -23,7 +22,7 @@ from .serializers import (CartSerializer, FollowSerializer,
                           RecipeSerializer, SetPasswordSerializer,
                           TagSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import RecipeFilter, IngredientSearchFilter
+from .filters import RecipeFilter
 from .pagination import LimitPageNumberPagination
 
 
@@ -153,18 +152,16 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly, ]
-    filter_backends = [DjangoFilterBackend, IngredientSearchFilter, ]
     search_fields = ('^name',)
     pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Ingredient' viewset."""
-    queryset = Recipe.objects.all().order_by('date')
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     paginator_class = LimitPageNumberPagination
     permission_classes = [IsAuthorOrReadOnly]
-    filter_backends = [DjangoFilterBackend, ]
     filter_class = RecipeFilter
 
     def perform_create(self, serializer):
