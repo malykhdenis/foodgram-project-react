@@ -1,32 +1,32 @@
 import { PurchaseList, Title, Container, Main, Button } from '../../components'
 import styles from './styles.module.css'
-import { useRecipe } from '../../utils/index.js'
+import { useRecipes } from '../../utils/index.js'
 import { useEffect, useState } from 'react'
 import api from '../../api'
-import MetaTag from 'react-meta-tags'
+import MetaTags from 'react-meta-tags'
 
 const Cart = ({ updateOrders, orders }) => {
   const {
     recipes,
-    setRecipe,
+    setRecipes,
     handleAddToCart
-  } = useRecipe()
+  } = useRecipes()
   
-  const getRecipe = () => {
+  const getRecipes = () => {
     api
-      .getRecipe({
+      .getRecipes({
         page: 1,
         limit: 999,
         is_in_shopping_cart: Number(true)
       })
       .then(res => {
         const { results } = res
-        setRecipe(results)
+        setRecipes(results)
       })
   }
 
   useEffect(_ => {
-    getRecipe()
+    getRecipes()
   }, [])
 
   const downloadDocument = () => {
@@ -35,11 +35,11 @@ const Cart = ({ updateOrders, orders }) => {
 
   return <Main>
     <Container className={styles.container}>
-      <MetaTag>
+      <MetaTags>
         <title>Список покупок</title>
         <meta name="description" content="Продуктовый помощник - Список покупок" />
         <meta property="og:title" content="Список покупок" />
-      </MetaTag>
+      </MetaTags>
       <div className={styles.cart}>
         <Title title='Список покупок' />
         <PurchaseList

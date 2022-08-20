@@ -1,12 +1,12 @@
-import { Container, Main, Button, TagContainer, Icons, LinkComponent } from '../../components'
+import { Container, Main, Button, TagsContainer, Icons, LinkComponent } from '../../components'
 import { UserContext, AuthContext } from '../../contexts'
 import { useContext, useState, useEffect } from 'react'
 import styles from './styles.module.css'
-import Ingredient from './ingredients'
+import Ingredients from './ingredients'
 import Description from './description'
 import cn from 'classnames'
 import { useRouteMatch, useParams, useHistory } from 'react-router-dom'
-import MetaTag from 'react-meta-tags'
+import MetaTags from 'react-meta-tags'
 
 import { useRecipe } from '../../utils/index.js'
 import api from '../../api'
@@ -53,11 +53,11 @@ const SingleCard = ({ loadItem, updateOrders }) => {
   
   return <Main>
     <Container>
-      <MetaTag>
+      <MetaTags>
         <title>{name}</title>
         <meta name="description" content={`Продуктовый помощник - ${name}`} />
         <meta property="og:title" content={name} />
-      </MetaTag>
+      </MetaTags>
       <div className={styles['single-card']}>
         <img src={image} alt={name} className={styles["single-card__image"]} />
         <div className={styles["single-card__info"]}>
@@ -72,7 +72,7 @@ const SingleCard = ({ loadItem, updateOrders }) => {
                 {is_favorited ? <Icons.StarBigActiveIcon /> : <Icons.StarBigIcon />}
               </Button>}
           </div>
-          <TagContainer tags={tags} />
+          <TagsContainer tags={tags} />
           <div>
             <p className={styles['single-card__text']}><Icons.ClockIcon /> {cooking_time} мин.</p>
             <p className={styles['single-card__text_with_link']}>
@@ -111,7 +111,7 @@ const SingleCard = ({ loadItem, updateOrders }) => {
               {author.is_subscribed ? 'Отписаться от автора' : 'Подписаться на автора'}
             </Button>}
           </div>
-          <Ingredient ingredients={ingredients} />
+          <Ingredients ingredients={ingredients} />
           <Description description={text} />
         </div>
     </div>

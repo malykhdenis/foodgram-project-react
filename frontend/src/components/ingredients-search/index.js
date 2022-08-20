@@ -1,6 +1,6 @@
 import styles from './styles.module.css'
 
-const IngredientSearch = ({ ingredients, onClick }) => {
+const IngredientsSearch = ({ ingredients, onClick }) => {
   return <div className={styles.container}>
     {ingredients.map(({ name, id, measurement_unit }) => {
       return <div key={id} onClick={_ => onClick({ id, name, measurement_unit })}>{name}</div>
@@ -8,4 +8,4 @@ const IngredientSearch = ({ ingredients, onClick }) => {
   </div>
 }
 
-export default IngredientSearch
+export default IngredientsSearch

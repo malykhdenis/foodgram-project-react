@@ -2,7 +2,7 @@ import { Title, Pagination, Container, Main, SubscriptionList  } from '../../com
 import { useSubscriptions } from '../../utils'
 import api from '../../api'
 import { useEffect } from 'react'
-import MetaTag from 'react-meta-tags'
+import MetaTags from 'react-meta-tags'
 
 const SubscriptionsPage = () => {
   const {
@@ -31,11 +31,11 @@ const SubscriptionsPage = () => {
 
   return <Main>
     <Container>
-      <MetaTag>
+      <MetaTags>
         <title>Мои подписки</title>
         <meta name="description" content="Продуктовый помощник - Мои подписки" />
         <meta property="og:title" content="Мои подписки" />
-      </MetaTag>
+      </MetaTags>
       <Title
         title='Мои подписки'
       />

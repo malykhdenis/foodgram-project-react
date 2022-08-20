@@ -2,7 +2,7 @@ import styles from './styles.module.css'
 import cn from 'classnames'
 import { Tag } from '../index'
 
-const TagContainer = ({ tags }) => {
+const TagsContainer = ({ tags }) => {
   if (!tags) { return null }
   return <div className={styles['tags-container']}>
     {tags.map(tag => {
@@ -15,4 +15,4 @@ const TagContainer = ({ tags }) => {
   </div>
 }
 
-export default TagContainer
+export default TagsContainer

@@ -22,7 +22,7 @@ from .serializers import (CartSerializer, FollowSerializer,
                           RecipeSerializer, SetPasswordSerializer,
                           TagSerializer, UserSerializer, UserCreateSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .filters import RecipeFilter
+from .filters import IngredientSearchFilter, RecipeFilter
 from .pagination import LimitPageNumberPagination
 
 
@@ -152,6 +152,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = (IngredientSearchFilter, )
     search_fields = ('^name',)
     pagination_class = None
 

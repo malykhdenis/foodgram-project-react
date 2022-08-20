@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useTag } from './index.js'
+import { useTags } from './index.js'
 import api from '../api'
 
-export default function useRecipe () {
+export default function useRecipes () {
   const [ subscriptions, setSubscriptions ] = useState([])
   const [ subscriptionsPage, setSubscriptionsPage ] = useState(1)
   const [ subscriptionsCount, setSubscriptionsCount ] = useState(0)

@@ -103,7 +103,7 @@ class Api {
 
   // recipes
 
-  getRecipe ({
+  getRecipes ({
     page = 1,
     limit = 6,
     is_favorited = 0,
@@ -203,7 +203,7 @@ class Api {
     ).then(this.checkResponse)
   }
 
-  addToFavorite ({ id }) {
+  addToFavorites ({ id }) {
     const token = localStorage.getItem('token')
     return fetch(
       `/api/recipes/${id}/favorite/`,
@@ -217,7 +217,7 @@ class Api {
     ).then(this.checkResponse)
   }
 
-  removeFromFavorite ({ id }) {
+  removeFromFavorites ({ id }) {
     const token = localStorage.getItem('token')
     return fetch(
       `/api/recipes/${id}/favorite/`,
@@ -315,7 +315,7 @@ class Api {
   }
 
   // ingredients
-  getIngredient ({ name }) {
+  getIngredients ({ name }) {
     const token = localStorage.getItem('token')
     return fetch(
       `/api/ingredients/?name=${name}`,
@@ -329,7 +329,7 @@ class Api {
   }
 
   // tags
-  getTag () {
+  getTags () {
     const token = localStorage.getItem('token')
     return fetch(
       `/api/tags/`,

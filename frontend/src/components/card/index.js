@@ -1,5 +1,5 @@
 import styles from './style.module.css'
-import { LinkComponent, Icons, Button, TagContainer } from '../index'
+import { LinkComponent, Icons, Button, TagsContainer } from '../index'
 import { useState, useContext } from 'react'
 import { AuthContext } from '../../contexts'
 
@@ -29,7 +29,7 @@ const Card = ({
           href={`/recipes/${id}`}
           title={name}
         />
-        <TagContainer tags={tags} />
+        <TagsContainer tags={tags} />
         <div className={styles.card__time}>
           <Icons.ClockIcon /> {cooking_time} мин.
         </div>

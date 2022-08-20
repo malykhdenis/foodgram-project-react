@@ -1,6 +1,6 @@
 import React from "react";
 
-export function useTag() {
+export function useTags() {
   const [ value, setValue ] = React.useState([])
 
   const handleChange = id => {

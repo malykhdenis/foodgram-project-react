@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { useTag } from './index.js'
+import { useTags } from './index.js'
 import api from '../api'
 
-export default function useRecipe () {
-  const [ recipes, setRecipe ] = useState([])
-  const [ recipesCount, setRecipeCount ] = useState(0)
-  const [ recipesPage, setRecipePage ] = useState(1)
-  const { value: tagsValue, handleChange: handleTagChange, setValue: setTagValue } = useTag()
+export default function useRecipes () {
+  const [ recipes, setRecipes ] = useState([])
+  const [ recipesCount, setRecipesCount ] = useState(0)
+  const [ recipesPage, setRecipesPage ] = useState(1)
+  const { value: tagsValue, handleChange: handleTagsChange, setValue: setTagsValue } = useTags()
 
   const handleLike = ({ id, toLike = true }) => {
-    const method = toLike ? api.addToFavorite.bind(api) : api.removeFromFavorite.bind(api)
+    const method = toLike ? api.addToFavorites.bind(api) : api.removeFromFavorites.bind(api)
     method({ id }).then(res => {
       const recipesUpdated = recipes.map(recipe => {
         if (recipe.id === id) {
@@ -17,7 +17,7 @@ export default function useRecipe () {
         }
         return recipe
       })
-      setRecipe(recipesUpdated)
+      setRecipes(recipesUpdated)
     })
     .catch(err => {
       const { errors } = err
@@ -36,7 +36,7 @@ export default function useRecipe () {
         }
         return recipe
       })
-      setRecipe(recipesUpdated)
+      setRecipes(recipesUpdated)
       callback && callback(toAdd)
     })
     .catch(err => {
@@ -49,15 +49,15 @@ export default function useRecipe () {
 
   return {
     recipes,
-    setRecipe,
+    setRecipes,
     recipesCount,
-    setRecipeCount,
+    setRecipesCount,
     recipesPage,
-    setRecipePage,
+    setRecipesPage,
     tagsValue,
     handleLike,
     handleAddToCart,
-    handleTagChange,
-    setTagValue
+    handleTagsChange,
+    setTagsValue
   }
 }

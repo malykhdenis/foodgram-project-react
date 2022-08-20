@@ -1,13 +1,13 @@
-import { Container, IngredientSearch, FileInput, Input, Title, CheckboxGroup, Main, Form, Button, Checkbox, Textarea } from '../../components'
+import { Container, IngredientsSearch, FileInput, Input, Title, CheckboxGroup, Main, Form, Button, Checkbox, Textarea } from '../../components'
 import styles from './styles.module.css'
 import api from '../../api'
 import { useEffect, useState } from 'react'
-import { useTag } from '../../utils'
+import { useTags } from '../../utils'
 import { useParams, useHistory } from 'react-router-dom'
-import MetaTag from 'react-meta-tags'
+import MetaTags from 'react-meta-tags'
 
 const RecipeEdit = ({ onItemDelete }) => {
-  const { value, handleChange, setValue } = useTag()
+  const { value, handleChange, setValue } = useTags()
   const [ recipeName, setRecipeName ] = useState('')
 
   const [ ingredientValue, setIngredientValue ] = useState({
@@ -17,7 +17,7 @@ const RecipeEdit = ({ onItemDelete }) => {
     measurement_unit: ''
   })
 
-  const [ recipeIngredient, setRecipeIngredient ] = useState([])
+  const [ recipeIngredients, setRecipeIngredients ] = useState([])
   const [ recipeText, setRecipeText ] = useState('')
   const [ recipeTime, setRecipeTime ] = useState(0)
   const [ recipeFile, setRecipeFile ] = useState(null)
@@ -26,24 +26,24 @@ const RecipeEdit = ({ onItemDelete }) => {
     setRecipeFileWasManuallyChanged
   ] = useState(false)
 
-  const [ ingredients, setIngredient ] = useState([])
-  const [ showIngredient, setShowIngredient ] = useState(false)
+  const [ ingredients, setIngredients ] = useState([])
+  const [ showIngredients, setShowIngredients ] = useState(false)
   const [ loading, setLoading ] = useState(true)
   const history = useHistory()
 
   useEffect(_ => {
     if (ingredientValue.name === '') {
-      return setIngredient([])
+      return setIngredients([])
     }
     api
-      .getIngredient({ name: ingredientValue.name })
+      .getIngredients({ name: ingredientValue.name })
       .then(ingredients => {
-        setIngredient(ingredients)
+        setIngredients(ingredients)
       })
   }, [ingredientValue.name])
 
   useEffect(_ => {
-    api.getTag()
+    api.getTags()
       .then(tags => {
         setValue(tags.map(tag => ({ ...tag, value: true })))
       })
@@ -67,7 +67,7 @@ const RecipeEdit = ({ onItemDelete }) => {
       setRecipeName(name)
       setRecipeTime(cooking_time)
       setRecipeFile(image)
-      setRecipeIngredient(ingredients)
+      setRecipeIngredients(ingredients)
 
 
       const tagsValueUpdated = value.map(item => {
@@ -94,7 +94,7 @@ const RecipeEdit = ({ onItemDelete }) => {
   const checkIfDisabled = () => {
     return recipeText === '' ||
     recipeName === '' ||
-    recipeIngredient.length === 0 ||
+    recipeIngredients.length === 0 ||
     value.filter(item => item.value).length === 0 ||
     recipeTime === '' ||
     recipeFile === '' ||
@@ -103,11 +103,11 @@ const RecipeEdit = ({ onItemDelete }) => {
 
   return <Main>
     <Container>
-      <MetaTag>
+      <MetaTags>
         <title>Редактирование рецепта</title>
         <meta name="description" content="Продуктовый помощник - Редактирование рецепта" />
         <meta property="og:title" content="Редактирование рецепта" />
-      </MetaTag>
+      </MetaTags>
       <Title title='Редактирование рецепта' />
       <Form
         className={styles.form}
@@ -116,7 +116,7 @@ const RecipeEdit = ({ onItemDelete }) => {
           const data = {
             text: recipeText,
             name: recipeName,
-            ingredients: recipeIngredient.map(item => ({
+            ingredients: recipeIngredients.map(item => ({
               id: item.id,
               amount: item.amount
             })),
@@ -165,7 +165,7 @@ const RecipeEdit = ({ onItemDelete }) => {
           values={value}
           className={styles.checkboxGroup}
           labelClassName={styles.checkboxGroupLabel}
-          tagsClassName={styles.checkboxGroupTag}
+          tagsClassName={styles.checkboxGroupTags}
           checkboxClassName={styles.checkboxGroupItem}
           handleChange={handleChange}
         />
@@ -184,7 +184,7 @@ const RecipeEdit = ({ onItemDelete }) => {
                 })
               }}
               onFocus={_ => {
-                setShowIngredient(true)
+                setShowIngredients(true)
               }}
               value={ingredientValue.name}
             />
@@ -203,27 +203,27 @@ const RecipeEdit = ({ onItemDelete }) => {
               />
               {ingredientValue.measurement_unit !== '' && <div className={styles.measurementUnit}>{ingredientValue.measurement_unit}</div>}
             </div>
-            {showIngredient && ingredients.length > 0 && <IngredientSearch
+            {showIngredients && ingredients.length > 0 && <IngredientsSearch
               ingredients={ingredients}
               onClick={({ id, name, measurement_unit }) => {
                 handleIngredientAutofill({ id, name, measurement_unit })
-                setIngredient([])
-                setShowIngredient(false)
+                setIngredients([])
+                setShowIngredients(false)
               }}
             />}
           </div>
           <div className={styles.ingredientsAdded}>
-            {recipeIngredient.map(item => {
+            {recipeIngredients.map(item => {
               return <div
                 className={styles.ingredientsAddedItem}
               >
                 <span className={styles.ingredientsAddedItemTitle}>{item.name}</span> <span>-</span> <span>{item.amount}{item.measurement_unit}</span> <span
                   className={styles.ingredientsAddedItemRemove}
                   onClick={_ => {
-                    const recipeIngredientUpdated = recipeIngredient.filter(ingredient => {
+                    const recipeIngredientsUpdated = recipeIngredients.filter(ingredient => {
                       return ingredient.id !== item.id
                     })
-                    setRecipeIngredient(recipeIngredientUpdated)
+                    setRecipeIngredients(recipeIngredientsUpdated)
                   }}
                 >Удалить</span>
               </div>
@@ -233,7 +233,7 @@ const RecipeEdit = ({ onItemDelete }) => {
             className={styles.ingredientAdd}
             onClick={_ => {
               if (ingredientValue.amount === '' || ingredientValue.name === '') { return }
-              setRecipeIngredient([...recipeIngredient, ingredientValue])
+              setRecipeIngredients([...recipeIngredients, ingredientValue])
               setIngredientValue({
                 name: '',
                 id: null,
