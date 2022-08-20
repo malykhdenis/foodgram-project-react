@@ -74,9 +74,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
         validators = [UniqueTogetherValidator(
             queryset=IngredientInRecipe.objects.all(),
-            fields=['ingredient', 'recipe']
-            )
-                      ]
+            fields=['ingredient', 'recipe'])]
 
 
 class RecipeSerializer(serializers.ModelSerializer):

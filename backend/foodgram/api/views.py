@@ -132,9 +132,9 @@ class UserViewSet(viewsets.ModelViewSet):
         current_user = request.user
         if not current_user:
             return Response(
-                    {'errors': 'Ни один пользователь не авторизован'},
-                    status=HTTPStatus.BAD_REQUEST,
-                )
+                {'errors': 'Ни один пользователь не авторизован'},
+                status=HTTPStatus.BAD_REQUEST,
+            )
         serializer = self.get_serializer(current_user)
         return Response(serializer.data, status=HTTPStatus.OK)
 
@@ -179,7 +179,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 {'errors': 'Рецепт уже в списке.'},
                 status=HTTPStatus.BAD_REQUEST,
-                )
+            )
         recipe = get_object_or_404(Recipe, pk=pk)
         model.objects.create(
             user=user,
@@ -189,7 +189,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(
             serializer.data,
             status=HTTPStatus.CREATED,
-            )
+        )
 
     def delete_object(self, model, user, pk):
         """Delete object."""
@@ -200,7 +200,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(
             {'errors': 'Рецепт уже удален'},
             status=HTTPStatus.BAD_REQUEST,
-            )
+        )
 
     @action(
         methods=['post', 'delete'],
@@ -251,8 +251,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = IngredientInRecipe.objects.filter(
             recipe__cart__user=user).values(
                 'ingredient__name',
-                'ingredient__measurement_unit'
-                ).annotate(amount_in_cart=Sum('amount'))
+                'ingredient__measurement_unit').annotate(
+                    amount_in_cart=Sum('amount'))
         for ingredient in ingredients:
             name = ingredient.get('ingredient__name')
             measurement_unit = ingredient.get('ingredient__measurement_unit')
