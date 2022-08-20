@@ -1,9 +1,8 @@
 # Foodgram
 
-
-![foodgram-project](https://github.com/DmitryShinkarev/foodgram-project/workflows/foodgram-project/badge.svg)
-
 Проект — сайт «Продуктовый помощник»
+
+## Адрес сервера: http://130.193.42.192 (superuser: admin, password: admin)
 
 ### Описание
 «Продуктовый помощник» - это сайт где пользователи могут вести свой кулинарный блог добавляя рецепты, делясь ими с другими пользователями а так же подписываясь на других пользователей и добавляя рецепты в "избранное" и "список покупок".
@@ -36,4 +35,3 @@ docker-compose down
 6. Создать суперпользователя
 ```
 docker-compose run backend python manage.py createsuperuser
-```
