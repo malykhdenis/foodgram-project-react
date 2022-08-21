@@ -35,3 +35,4 @@ docker-compose down
 6. Создать суперпользователя
 ```
 docker-compose run backend python manage.py createsuperuser
+```

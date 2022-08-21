@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous or user == obj:
             return False
-        return user.follower.filter(id=obj.id).exists()
+        return Follow.objects.filter(user=user, author=obj.id).exists()
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -206,7 +206,7 @@ class FollowSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.ReadOnlyField(source='author.is_subscribed')
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -214,11 +214,6 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
-
-    def get_is_subscribed(self, obj):
-        """"Checking if user is subscribed."""
-        return Follow.objects.filter(user=obj.user,
-                                     author=obj.author).exists()
 
     def get_recipes(self, obj):
         """All users' recipes with limit."""
