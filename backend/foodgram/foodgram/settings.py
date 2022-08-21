@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['130.193.42.192',
+ALLOWED_HOSTS = ['51.250.103.200',
                  'malykhdk.sytes.net',
                  '127.0.0.1',
                  'localhost',
